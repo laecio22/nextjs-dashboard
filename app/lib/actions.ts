@@ -71,12 +71,22 @@ const UpdateInvoice = FormSchema.omit({ id: true, date: true });
  
 // ...
  
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
-    customerId: formData.get('customerId'),
+export async function updateInvoice(id: string, prevState:State, formData: FormData) {
+
+  const validateEditFields = UpdateInvoice.safeParse({
+     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
-  });
+  })
+
+  if (!validateEditFields.success) {
+    return {
+      message: "Missing Fields. Failed to Edit Invoice. ",
+      errors: validateEditFields.error.flatten().fieldErrors, 
+    }
+  }
+  const { customerId, amount, status } = validateEditFields.data
+  
  
   const amountInCents = amount * 100;
 
